@@ -1,4 +1,5 @@
 import argparse
+import json
 
 from rich import print
 
@@ -31,6 +32,28 @@ def get_args():
         help="The file to prefer when merging. Left or right means not to overwrite the data with the other file. Latest means to prefer the data from the file with the most progress.",
         choices=["left", "right", "latest"],
         default="latest",
+    )
+    export_subparser = subparsers.add_parser(
+        "export", help="Export a save file to JSON", aliases=["e"]
+    )
+    export_subparser.add_argument("file", type=str, help="The .jkr file to export")
+    export_subparser.add_argument(
+        "--output",
+        "-o",
+        type=str,
+        help="The file to save the exported data to",
+        default="exported.json",
+    )
+    import_subparser = subparsers.add_parser(
+        "import", help="Import a save file from JSON", aliases=["i"]
+    )
+    import_subparser.add_argument("file", type=str, help="The .json file to import")
+    import_subparser.add_argument(
+        "--output",
+        "-o",
+        type=str,
+        help="The file to save the imported data to",
+        default="imported.jkr",
     )
 
     return parser.parse_args()
@@ -76,6 +99,21 @@ def merge(left: dict, right: dict, prefer: str) -> dict:
     return result
 
 
+def export(file_name: str, output: str) -> None:
+    """Export the save file to a Python file."""
+    data = parse(file_name)
+    with open(output, "w", encoding="UTF-8") as f:
+        f.write(json.dumps(data, indent=4))
+
+
+def import_(file_name: str, output: str) -> None:
+    """Import the save file from a Python file."""
+    with open(file_name, "r", encoding="UTF-8") as f:
+        data = f.read()
+    data = json.loads(data)
+    save(output, data)
+
+
 def main():
     args = get_args()
     if args.command in {"view", "v"}:
@@ -87,6 +125,12 @@ def main():
         result = merge(left, right, args.prefer)
         save(args.output, result)
         print(f"Merged data saved to {args.output}")
+    elif args.command in {"export", "e"}:
+        export(args.file, args.output)
+        print(f"Exported data saved to {args.output}")
+    elif args.command in {"import", "i"}:
+        import_(args.file, args.output)
+        print(f"Imported data saved to {args.output}")
 
 
 if __name__ == "__main__":
