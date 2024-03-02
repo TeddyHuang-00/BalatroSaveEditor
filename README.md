@@ -39,11 +39,43 @@ This is a helper for managing saves of Balatro, including merging and editing.
 
 - Merge save files
 
-  Work in progress
+  This will merge `left_save_file` and `right_save_file` with the most progress kept.
+
+  ```bash
+  python main.py merge <left_save_file> <right_save_file>
+  ```
+
+  You can change this behavior by using `-p` or `--prefer` option. This will make sure the progress of the specified save file is kept if there is any conflict.
+
+  ```bash
+  python main.py merge <left_save_file> <right_save_file> -p <left|right>
+  ```
+
+  You can also specify the output file by using `-o` or `--output` option.
+
+  ```bash
+  python main.py merge <left_save_file> <right_save_file> -o <output_save_file>
+  ```
 
 - Edit save file
 
-  Work in progress
+  This will export the save file to a JSON file which can be edited.
+
+  ```bash
+  python main.py export <save_file>
+  ```
+
+  You can edit the JSON file and import it back to the save file.
+
+  ```bash
+  python main.py import <json_file>
+  ```
+
+  You can also specify the output file by using `-o` or `--output` option for both exporting and importing.
+
+  ```bash
+  python main.py export <save_file> -o <output_json_file>
+  ```
 
 ## License
 
