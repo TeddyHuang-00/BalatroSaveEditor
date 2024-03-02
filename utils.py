@@ -62,4 +62,4 @@ def decompress(file_name: str) -> dict:
 
 def compress(obj: dict, file_name: str) -> None:
     """Compress the object and write it to a file."""
-    compress_raw(convert_obj(obj), file_name)
+    compress_raw("return " + convert_obj(obj), file_name)
