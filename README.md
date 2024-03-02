@@ -2,6 +2,11 @@
 
 This is a helper for managing saves of Balatro, including merging and editing.
 
+## Where to find save files
+
+- Windows: `%APPDATA%\Roaming\Balatro`
+- macOS: `~/Library/Application Support/Balatro`
+
 ## Installation
 
 1. Clone this repo
