@@ -4,26 +4,25 @@ Utility functions for IO of compressed files and parsing of the data.
 
 import zlib
 import ast
+from pathlib import Path
 
 __all__ = ["decompress", "compress", "encode", "decode"]
 
 
-def decompress_raw(file_name: str) -> str:
+def decompress_raw(file: Path) -> str:
     """Read and parse the compressed file and return the decompressed data as a string."""
-    with open(file_name, "rb") as f:
-        data = f.read()
+    data = file.read_bytes()
     decompressor = zlib.decompressobj(-zlib.MAX_WBITS)  # For raw deflate data
     decompressed_data = decompressor.decompress(data)
     return decompressed_data.decode("utf-8")
 
 
-def compress_raw(data: str, file_name: str) -> None:
+def compress_raw(data: str, file: Path) -> None:
     """Compress the data and write it to a file."""
     compressor = zlib.compressobj(1, zlib.DEFLATED, -zlib.MAX_WBITS)
     compressed_data = compressor.compress(data.encode("utf-8"))
     compressed_data += compressor.flush()
-    with open(file_name, "wb") as f:
-        f.write(compressed_data)
+    file.write_bytes(compressed_data)
 
 
 def parse_obj(data: str) -> dict:
@@ -55,14 +54,14 @@ def convert_obj(obj: dict) -> str:
     return "{" + result + "}"
 
 
-def decompress(file_name: str) -> dict:
+def decompress(file: Path) -> dict:
     """Read and parse the compressed file and return the decompressed data as an object."""
-    return parse_obj(decompress_raw(file_name))
+    return parse_obj(decompress_raw(file))
 
 
-def compress(obj: dict, file_name: str) -> None:
+def compress(obj: dict, file: Path) -> None:
     """Compress the object and write it to a file."""
-    compress_raw("return " + convert_obj(obj), file_name)
+    compress_raw("return " + convert_obj(obj), file)
 
 
 def encode(obj: dict) -> dict:
