@@ -20,6 +20,7 @@ def get_args():
         type=str,
         help="The format to output (json or lua)",
         choices=["json", "lua"],
+        default="json",
     )
     merge_subparser = subparsers.add_parser(
         "merge", help="Merge two save files", aliases=["m"]
@@ -107,28 +108,34 @@ def merge(left: dict, right: dict, prefer: str) -> dict:
     return result
 
 
-def export(file_name: Path, output: Path) -> None:
-    """Export the save file to a Python file."""
+def export(file: Path, output: Path) -> None:
+    """Export the save file to a JSON/lua file."""
     output_file = Path(output)
     if output_file.suffix == ".json":
-        data = parse(file_name)
-        output_file.write_text(json.dumps(data, indent=4).replace(r"\"", r"\\\""), encoding="UTF-8")
+        data = encode(parse(file))
+        output_file.write_text(
+            json.dumps(data, indent=4).replace(r"\"", r"\\\""), encoding="UTF-8"
+        )
     elif output_file.suffix == ".lua":
-        data = decompress_raw(file_name)
+        data = decompress_raw(file)
         output_file.write_text(data, encoding="UTF-8")
     else:
-        raise ValueError(f"{output_file.parts[-1]} is not a valid file (should be .json or.lua)")
+        raise ValueError(
+            f"{output_file.parts[-1]} is not a valid file (should be .json or.lua)"
+        )
 
 
-def import_(input: Path, output: Path) -> None:
-    """Import the save file from a Python file."""
-    data = input.read_text(encoding="UTF-8")
-    if input.suffix == ".json":
+def import_(file: Path, output: Path) -> None:
+    """Import the save file from a JSON/lua file."""
+    data = file.read_text(encoding="UTF-8")
+    if file.suffix == ".json":
         save(output, decode(json.loads(data)))
-    elif input.suffix == ".lua":
+    elif file.suffix == ".lua":
         compress_raw(data, output)
     else:
-        raise ValueError(f"{output.parts[-1]} is not a valid file (should be .json or.lua)")
+        raise ValueError(
+            f"{output.parts[-1]} is not a valid file (should be .json or.lua)"
+        )
 
 
 def main():
@@ -136,8 +143,7 @@ def main():
     if args.command in {"view", "v"}:
         file = Path(args.file)
         if args.format == "json":
-            data = parse(file)
-            print(data)
+            print(parse(file))
         elif args.format == "lua":
             print(decompress_raw(file))
     elif args.command in {"merge", "m"}:
