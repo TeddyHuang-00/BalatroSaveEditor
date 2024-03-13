@@ -1,9 +1,10 @@
 import argparse
 import json
+from pathlib import Path
 
 from rich import print
 
-from utils import compress, decompress, encode, decode
+from utils import compress, compress_raw, decompress, decompress_raw, encode, decode
 
 
 def get_args():
@@ -13,6 +14,14 @@ def get_args():
         "view", help="View a save file", aliases=["v"]
     )
     view_subparser.add_argument("file", type=str, help="The file to view")
+    view_subparser.add_argument(
+        "--format",
+        "-f",
+        type=str,
+        help="The format to output (json or lua)",
+        choices=["json", "lua"],
+        default="json",
+    )
     merge_subparser = subparsers.add_parser(
         "merge", help="Merge two save files", aliases=["m"]
     )
@@ -59,18 +68,18 @@ def get_args():
     return parser.parse_args()
 
 
-def parse(file_name: str) -> dict:
+def parse(file: Path) -> dict:
     """Try to parse the file and return the result."""
-    if not file_name.endswith(".jkr"):
-        raise ValueError(f"{file_name} is not a valid file")
-    if file_name == "version.jkr":
+    if not file.suffix == ".jkr":
+        raise ValueError(f"{file} is not a valid file")
+    if file.parts[-1] == "version.jkr":
         raise ValueError("version.jkr is not a save file")
-    return decompress(file_name)
+    return decompress(file)
 
 
-def save(file_name: str, data: dict) -> None:
+def save(file: Path, data: dict) -> None:
     """Try to save the data to the file."""
-    compress(data, file_name)
+    compress(data, file)
 
 
 def merge(left: dict, right: dict, prefer: str) -> dict:
@@ -99,37 +108,55 @@ def merge(left: dict, right: dict, prefer: str) -> dict:
     return result
 
 
-def export(file_name: str, output: str) -> None:
-    """Export the save file to a Python file."""
-    data = encode(parse(file_name))
-    with open(output, "w", encoding="UTF-8") as f:
-        f.write(json.dumps(data, indent=4).replace(r"\"", r"\\\""))
+def export(file: Path, output: Path) -> None:
+    """Export the save file to a JSON/lua file."""
+    output_file = Path(output)
+    if output_file.suffix == ".json":
+        data = encode(parse(file))
+        output_file.write_text(
+            json.dumps(data, indent=4).replace(r"\"", r"\\\""), encoding="UTF-8"
+        )
+    elif output_file.suffix == ".lua":
+        data = decompress_raw(file)
+        output_file.write_text(data, encoding="UTF-8")
+    else:
+        raise ValueError(
+            f"{output_file.parts[-1]} is not a valid file (should be .json or.lua)"
+        )
 
 
-def import_(file_name: str, output: str) -> None:
-    """Import the save file from a Python file."""
-    with open(file_name, "r", encoding="UTF-8") as f:
-        data = f.read()
-    data = decode(json.loads(data))
-    save(output, data)
+def import_(file: Path, output: Path) -> None:
+    """Import the save file from a JSON/lua file."""
+    data = file.read_text(encoding="UTF-8")
+    if file.suffix == ".json":
+        save(output, decode(json.loads(data)))
+    elif file.suffix == ".lua":
+        compress_raw(data, output)
+    else:
+        raise ValueError(
+            f"{output.parts[-1]} is not a valid file (should be .json or.lua)"
+        )
 
 
 def main():
     args = get_args()
     if args.command in {"view", "v"}:
-        data = parse(args.file)
-        print(data)
+        file = Path(args.file)
+        if args.format == "json":
+            print(parse(file))
+        elif args.format == "lua":
+            print(decompress_raw(file))
     elif args.command in {"merge", "m"}:
-        left = parse(args.left)
-        right = parse(args.right)
+        left = parse(Path(args.left))
+        right = parse(Path(args.right))
         result = merge(left, right, args.prefer)
-        save(args.output, result)
+        save(Path(args.output), result)
         print(f"Merged data saved to {args.output}")
     elif args.command in {"export", "e"}:
-        export(args.file, args.output)
+        export(Path(args.file), Path(args.output))
         print(f"Exported data saved to {args.output}")
     elif args.command in {"import", "i"}:
-        import_(args.file, args.output)
+        import_(Path(args.file), Path(args.output))
         print(f"Imported data saved to {args.output}")
 
 
