@@ -2,6 +2,17 @@
 
 This is a helper for managing saves of Balatro, including merging and editing.
 
+:stop_sign: **This project is not affiliated with Balatro.** :stop_sign:
+
+<details>
+<summary> :floppy_disk: <strong>Please make sure you have backups in case of unexpected bugs.</strong> :floppy_disk: </summary>
+
+:warning: The script is built without prior knowledge of how the game works, so bugs are expected when test cases don't fully cover or the game gets updates.
+
+:warning: Please file an issue if you encounter any bug or the game crashes.
+
+</details>
+
 ## Where to find save files
 
 - Windows: `%APPDATA%\Roaming\Balatro`
