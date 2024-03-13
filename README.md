@@ -44,8 +44,16 @@ This is a helper for managing saves of Balatro, including merging and editing.
 
 - View save file
 
+  This will print the save file in a human-readable JSON format.
+
   ```bash
   python main.py view <save_file>
+  ```
+
+  Optionally, you can specify the output format by using `-f` or `--format` option. Currently, `json` and `lua` are supported.
+
+  ```bash
+  python main.py view <save_file> -f <json|lua>
   ```
 
 - Merge save files
