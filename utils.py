@@ -5,7 +5,7 @@ Utility functions for IO of compressed files and parsing of the data.
 import zlib
 import ast
 
-__all__ = ["decompress", "compress"]
+__all__ = ["decompress", "compress", "encode", "decode"]
 
 
 def decompress_raw(file_name: str) -> str:
@@ -63,3 +63,28 @@ def decompress(file_name: str) -> dict:
 def compress(obj: dict, file_name: str) -> None:
     """Compress the object and write it to a file."""
     compress_raw("return " + convert_obj(obj), file_name)
+
+
+def encode(obj: dict) -> dict:
+    """Encode the object to a type-safe dictionary"""
+
+    result = {}
+    for key, value in obj.items():
+        if isinstance(key, int):
+            key = "\t\f" + str(key)
+        if isinstance(value, dict):
+            value = encode(value)
+        result[key] = value
+    return result
+
+
+def decode(obj: dict) -> dict:
+    """Decode the object to a type-safe dictionary"""
+    result = {}
+    for key, value in obj.items():
+        if key.startswith("\t\f"):
+            key = int(key[2:])
+        if isinstance(value, dict):
+            value = decode(value)
+        result[key] = value
+    return result

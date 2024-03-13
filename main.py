@@ -3,7 +3,7 @@ import json
 
 from rich import print
 
-from utils import compress, decompress
+from utils import compress, decompress, encode, decode
 
 
 def get_args():
@@ -101,16 +101,16 @@ def merge(left: dict, right: dict, prefer: str) -> dict:
 
 def export(file_name: str, output: str) -> None:
     """Export the save file to a Python file."""
-    data = parse(file_name)
+    data = encode(parse(file_name))
     with open(output, "w", encoding="UTF-8") as f:
-        f.write(json.dumps(data, indent=4))
+        f.write(json.dumps(data, indent=4).replace(r"\"", r"\\\""))
 
 
 def import_(file_name: str, output: str) -> None:
     """Import the save file from a Python file."""
     with open(file_name, "r", encoding="UTF-8") as f:
         data = f.read()
-    data = json.loads(data)
+    data = decode(json.loads(data))
     save(output, data)
 
 
