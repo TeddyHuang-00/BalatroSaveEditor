@@ -1,5 +1,6 @@
 import argparse
 import json
+from typing import Any
 
 from rich import print
 
@@ -111,6 +112,21 @@ def import_(file_name: str, output: str) -> None:
     with open(file_name, "r", encoding="UTF-8") as f:
         data = f.read()
     data = json.loads(data)
+
+    def parse_int_keys(obj: dict[str, Any]) -> dict:
+        """Parse the integer keys in the object."""
+        result = {}
+        for key, value in obj.items():
+            if key.isdigit():
+                key = int(key)
+            if isinstance(value, dict):
+                value = parse_int_keys(value)
+            result[key] = value
+        return result
+
+    # Fix the integer keys that were converted to strings by json
+    data = parse_int_keys(data)
+
     save(output, data)
 
 
