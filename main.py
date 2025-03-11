@@ -43,7 +43,7 @@ def get_args():
         default="latest",
     )
     export_subparser = subparsers.add_parser(
-        "export", help="Export a save file to JSON", aliases=["e"]
+        "export", help="Export a save file to JSON or lua", aliases=["e"]
     )
     export_subparser.add_argument("file", type=str, help="The .jkr file to export")
     export_subparser.add_argument(
@@ -54,7 +54,7 @@ def get_args():
         default="exported.json",
     )
     import_subparser = subparsers.add_parser(
-        "import", help="Import a save file from JSON", aliases=["i"]
+        "import", help="Import a save file from JSON or lua", aliases=["i"]
     )
     import_subparser.add_argument("file", type=str, help="The .json file to import")
     import_subparser.add_argument(
