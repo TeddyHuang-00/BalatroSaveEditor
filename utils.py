@@ -6,7 +6,14 @@ import zlib
 import ast
 from pathlib import Path
 
-__all__ = ["decompress", "compress", "encode", "decode"]
+__all__ = [
+    "decompress_raw",
+    "compress_raw",
+    "decompress",
+    "compress",
+    "encode",
+    "decode",
+]
 
 
 def decompress_raw(file: Path) -> str:
